@@ -15,11 +15,13 @@ const getStories = async (storyType: StoryTypes) => {
 
 const getItemWithComments = async (itemId: string): Promise<ItemWithComments | null> => {
     const item = await getItem(itemId);
-    if(item && Array.isArray(item?.kids)) {
+    if(item) {
         const comments: Item[] = [];
-        for (const chlidId of item.kids) {
-            const chlid = await getItem(chlidId.toString());
-            if(chlid) comments.push(chlid);
+        if(Array.isArray(item?.kids)){
+            for (const childId of item.kids) {
+                const child = await getItem(childId.toString());
+                if(child) comments.push(child);
+            }
         }
         const result: ItemWithComments = {
             ...item,

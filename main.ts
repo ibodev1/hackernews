@@ -1,10 +1,10 @@
-import { Hono } from "https://deno.land/x/hono@v3.7.2/mod.ts";
+import { Hono } from "hono";
 import {
   cors,
   logger,
   prettyJSON,
   secureHeaders,
-} from "https://deno.land/x/hono@v3.7.2/middleware.ts";
+} from "hono/middleware";
 import {
   ResponseObject,
   Result

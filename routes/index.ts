@@ -1,4 +1,4 @@
-import { Hono } from "https://deno.land/x/hono@v3.7.2/mod.ts";
+import { Hono } from "hono";
 import { schema, ZodError } from "./schema.ts";
 import { getItem, getStories } from "../helpers/item.ts";
 import { paginate } from "../helpers/utils.ts";

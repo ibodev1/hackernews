@@ -1,4 +1,4 @@
-import { z, ZodError } from "https://deno.land/x/zod@v3.22.2/mod.ts";
+import { z, ZodError } from "zod";
 
 const schema = z.object({
   page: z.string().default("1"),

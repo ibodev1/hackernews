@@ -25,13 +25,14 @@ indexRouter.get("/", async (ctx) => {
 
     const paginateValues = paginate<number>(stories, page, limit);
 
-    const storyArray: Item[] = [];
+    let storyArray: Item[] = [];
+    const storyAsyncArray: Promise<Item | null>[] = [];
 
     if (stories && paginateValues && Array.isArray(paginateValues.data)) {
       for (const storyId of paginateValues.data) {
-        const item = await getItem(storyId.toString());
-        if (item) storyArray.push(item);
+        storyAsyncArray.push(getItem(storyId.toString()))
       }
+      storyArray = (await Promise.all(storyAsyncArray)).filter(q => q !== null) as Item[];
       return ctx.json<Respond<Paginate<Item[]>>>({
         result: Result.Success,
         responseTime: Date.now(),
@@ -75,13 +76,14 @@ indexRouter.get("/:type", async (ctx) => {
 
     const paginateValues = paginate<number>(stories, page, limit);
 
-    const storyArray: Item[] = [];
+    let storyArray: Item[] = [];
+    const storyAsyncArray: Promise<Item | null>[] = [];
 
     if (stories && paginateValues && Array.isArray(paginateValues.data)) {
       for (const storyId of paginateValues.data) {
-        const item = await getItem(storyId.toString());
-        if (item) storyArray.push(item);
+        storyAsyncArray.push(getItem(storyId.toString()))
       }
+      storyArray = (await Promise.all(storyAsyncArray)).filter(q => q !== null) as Item[];
       return ctx.json<Respond<Paginate<Item[]>>>({
         result: Result.Success,
         responseTime: Date.now(),

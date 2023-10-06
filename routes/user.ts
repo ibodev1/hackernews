@@ -57,13 +57,13 @@ userRouter.get("/:id/submitted", async (ctx) => {
     if (typeof id === "string" && id !== "") {
       const user = await getUser(id);
       if (user && Array.isArray(user.submitted)) {
-        const paginateValues = paginate<number>(user.submitted, page, limit),
-          submittedArray: Item[] = [];
+        let submittedArray: Item[] = [];
+        const paginateValues = paginate<number>(user.submitted, page, limit), submittedAsyncArray: Promise<Item | null>[] = [];
         if (paginateValues && Array.isArray(paginateValues.data)) {
           for (const storyId of paginateValues.data) {
-            const item = await getItem(storyId.toString());
-            if (item) submittedArray.push(item);
+            submittedAsyncArray.push(getItem(storyId.toString()));
           }
+          submittedArray = (await Promise.all(submittedAsyncArray)).filter(q => q !== null) as Item[];
           return ctx.json<Respond<Paginate<Item[]>>>({
             result: Result.Success,
             responseTime: Date.now(),

@@ -1,5 +1,5 @@
 const firebaseConfig = {
-  databaseURL: "https://hacker-news.firebaseio.com/",
-};
+  databaseURL: 'https://hacker-news.firebaseio.com/',
+}
 
-export default firebaseConfig;
+export default firebaseConfig

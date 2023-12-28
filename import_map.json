@@ -1,9 +1,9 @@
 {
-    "imports": {
-        "xhr": "https://deno.land/x/xhr@0.3.1/mod.ts",
-        "firebase/": "https://cdn.skypack.dev/firebase@8.7.0/",
-        "hono": "https://deno.land/x/hono@v3.7.2/mod.ts",
-        "hono/middleware": "https://deno.land/x/hono@v3.7.2/middleware.ts",
-        "zod": "https://deno.land/x/zod@v3.22.2/mod.ts"
-    }
+  "imports": {
+    "xhr": "https://deno.land/x/xhr@0.3.1/mod.ts",
+    "firebase/": "https://cdn.skypack.dev/firebase@8.7.0/",
+    "hono": "https://deno.land/x/hono@v3.11.11/mod.ts",
+    "hono/middleware": "https://deno.land/x/hono@v3.11.11/middleware.ts",
+    "zod": "https://deno.land/x/zod@v3.22.4/mod.ts"
+  }
 }

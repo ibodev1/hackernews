@@ -3,20 +3,20 @@ import { Item, ItemWithComments, StoryTypes } from '../types.ts'
 
 const getItem = async (itemId: string): Promise<Item | null> => {
   try {
-    const item = await db.child('item').child(itemId).get()
-    if (!item.exists()) return null
-    return item.val() as unknown as Item
-  } catch (_e) {
+    const itemSnapshot = await db.child('item').child(itemId).get()
+    if (!itemSnapshot.exists()) return null
+    return itemSnapshot.val() as Item
+  } catch {
     return null
   }
 }
 
 const getStories = async (storyType: StoryTypes) => {
   try {
-    const stories = await db.child(storyType).get()
-    if (!stories.exists()) return null
-    return stories.val() as unknown as number[]
-  } catch (_e) {
+    const storySnapshot = await db.child(storyType).get()
+    if (!storySnapshot.exists()) return null
+    return storySnapshot.val() as number[]
+  } catch {
     return null
   }
 }
@@ -25,25 +25,15 @@ const getItemWithComments = async (
   itemId: string,
 ): Promise<ItemWithComments | null> => {
   const item = await getItem(itemId)
-  if (item) {
-    let comments: Item[] = []
-    const commentsAsyncArray: Promise<Item | null>[] = []
-    if (Array.isArray(item?.kids)) {
-      for (const childId of item.kids) {
-        commentsAsyncArray.push(getItem(childId.toString()))
-      }
-      comments = (await Promise.all(commentsAsyncArray)).filter((q) =>
-        q !== null
-      ) as Item[]
-    }
-    const result: ItemWithComments = {
-      ...item,
-      comments,
-    }
-    return result
-  }
+  if (!item) return null
 
-  return null
+  const comments = Array.isArray(item.kids)
+    ? (await Promise.all(
+      item.kids?.map((childId) => getItem(childId.toString())),
+    )).filter(Boolean) as Item[]
+    : []
+
+  return { ...item, comments }
 }
 
 export { getItem, getItemWithComments, getStories }

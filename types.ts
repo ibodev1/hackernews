@@ -1,3 +1,5 @@
+import type { ZodIssue } from 'zod'
+
 enum ItemTypes {
   Story = 'story',
   Comment = 'comment',
@@ -54,14 +56,12 @@ enum Result {
 type Respond<T> = {
   result: Result
   message?: string
-  responseTime: number
 } & T
 
 interface ResponseObject {
   result: Result
   message?: string
-  issues?: unknown
-  responseTime: number
+  issues?: ZodIssue[]
 }
 
 type Paginate<T> = {

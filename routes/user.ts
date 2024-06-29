@@ -24,7 +24,6 @@ userRouter.get('/:id', async (ctx) => {
       } else {
         return ctx.json<ResponseObject>({
           result: Result.Warning,
-          responseTime: Date.now(),
           message: 'Not found',
         })
       }
@@ -32,13 +31,11 @@ userRouter.get('/:id', async (ctx) => {
 
     return ctx.json<ResponseObject>({
       result: Result.Warning,
-      responseTime: Date.now(),
       message: 'Not found',
     })
   } catch (error) {
     return ctx.json<ResponseObject>({
       result: Result.Error,
-      responseTime: Date.now(),
       message: error.toString(),
     })
   }
@@ -69,7 +66,6 @@ userRouter.get('/:id/submitted', async (ctx) => {
           ) as Item[]
           return ctx.json<Respond<Paginate<Item[]>>>({
             result: Result.Success,
-            responseTime: Date.now(),
             ...paginateValues,
             data: submittedArray,
           })
@@ -77,7 +73,6 @@ userRouter.get('/:id/submitted', async (ctx) => {
       } else {
         return ctx.json<ResponseObject>({
           result: Result.Warning,
-          responseTime: Date.now(),
           message: 'Not found',
         })
       }
@@ -85,20 +80,17 @@ userRouter.get('/:id/submitted', async (ctx) => {
 
     return ctx.json<ResponseObject>({
       result: Result.Warning,
-      responseTime: Date.now(),
       message: 'Not found',
     })
   } catch (error) {
     if (error instanceof ZodError) {
       return ctx.json<ResponseObject>({
         result: Result.Error,
-        responseTime: Date.now(),
         issues: error.issues,
       })
     }
     return ctx.json<ResponseObject>({
       result: Result.Error,
-      responseTime: Date.now(),
       message: error.toString(),
     })
   }

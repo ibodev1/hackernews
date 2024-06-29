@@ -14,7 +14,6 @@ itemRouter.get('/:id', async (ctx) => {
       } else {
         return ctx.json<ResponseObject>({
           result: Result.Warning,
-          responseTime: Date.now(),
           message: 'Not found',
         })
       }
@@ -22,13 +21,11 @@ itemRouter.get('/:id', async (ctx) => {
 
     return ctx.json<ResponseObject>({
       result: Result.Warning,
-      responseTime: Date.now(),
       message: 'Not found',
     })
   } catch (error) {
     return ctx.json<ResponseObject>({
       result: Result.Error,
-      responseTime: Date.now(),
       message: error.toString(),
     })
   }

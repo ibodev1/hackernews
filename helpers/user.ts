@@ -3,10 +3,10 @@ import { User } from '../types.ts'
 
 const getUser = async (userId: string): Promise<User | null> => {
   try {
-    const user = await db.child('user').child(userId).get()
-    if (!user.exists()) return null
-    return user.val() as unknown as User
-  } catch (_e) {
+    const userSnapshot = await db.child('user').child(userId).get()
+    if (!userSnapshot.exists()) return null
+    return userSnapshot.val() as User
+  } catch {
     return null
   }
 }

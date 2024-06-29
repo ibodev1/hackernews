@@ -29,7 +29,6 @@ app.route('/user', userRouter)
 app.notFound((ctx) => {
   return ctx.json<ResponseObject>({
     result: Result.Warning,
-    responseTime: Date.now(),
     message: '404 Not Found',
   })
 })
@@ -37,7 +36,6 @@ app.notFound((ctx) => {
 app.onError((error, ctx) => {
   return ctx.json<ResponseObject>({
     result: Result.Error,
-    responseTime: Date.now(),
     message: error.message,
   })
 })

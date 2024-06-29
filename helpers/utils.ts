@@ -5,21 +5,19 @@ const paginate = <T>(
   page = 1,
   perPage = 10,
 ): Paginate<T> | null => {
-  if (Array.isArray(items)) {
-    const offset = perPage * (page - 1)
-    const totalPages = Math.ceil(items.length / perPage)
-    const paginatedItems = items.slice(offset, perPage * page)
+  if (!Array.isArray(items)) return null
 
-    return {
-      previousPage: page - 1 ? page - 1 : null,
-      nextPage: (totalPages > page) ? page + 1 : null,
-      total: items.length,
-      totalPages: totalPages,
-      data: paginatedItems as T[],
-    }
+  const offset = perPage * (page - 1)
+  const totalPages = Math.ceil(items.length / perPage)
+  const paginatedItems = items.slice(offset, offset + perPage)
+
+  return {
+    previousPage: page > 1 ? page - 1 : null,
+    nextPage: totalPages > page ? page + 1 : null,
+    total: items.length,
+    totalPages,
+    data: paginatedItems,
   }
-
-  return null
 }
 
 export { paginate }

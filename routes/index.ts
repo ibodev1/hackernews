@@ -17,48 +17,46 @@ indexRouter.get('/', async (ctx) => {
   try {
     const query = ctx.req.query()
     const parsedQuery = schema.parse(query)
-
     const page = parseInt(parsedQuery.page)
     const limit = parseInt(parsedQuery.limit)
-
     const stories = await getStories(StoryTypes.Top)
 
-    const paginateValues = paginate<number>(stories, page, limit)
-
-    let storyArray: Item[] = []
-    const storyAsyncArray: Promise<Item | null>[] = []
-
-    if (stories && paginateValues && Array.isArray(paginateValues.data)) {
-      for (const storyId of paginateValues.data) {
-        storyAsyncArray.push(getItem(storyId.toString()))
-      }
-      storyArray = (await Promise.all(storyAsyncArray)).filter((q) =>
-        q !== null
-      ) as Item[]
-      return ctx.json<Respond<Paginate<Item[]>>>({
-        result: Result.Success,
-        responseTime: Date.now(),
-        ...paginateValues,
-        data: storyArray,
+    if (!stories) {
+      return ctx.json<ResponseObject>({
+        result: Result.Warning,
+        message: 'No data.',
       })
     }
 
-    return ctx.json<ResponseObject>({
-      result: Result.Warning,
-      responseTime: Date.now(),
-      message: 'No data.',
+    const paginateValues = paginate<number>(stories, page, limit)
+    if (!paginateValues || !Array.isArray(paginateValues.data)) {
+      return ctx.json<ResponseObject>({
+        result: Result.Warning,
+        message: 'No data.',
+      })
+    }
+
+    const storyArray = (await Promise.all(paginateValues.data.map((storyId) =>
+      getItem(storyId.toString())
+    )))
+      .filter((item): item is Item =>
+        item !== null
+      )
+
+    return ctx.json<Respond<Paginate<Item[]>>>({
+      result: Result.Success,
+      ...paginateValues,
+      data: storyArray,
     })
   } catch (error) {
     if (error instanceof ZodError) {
       return ctx.json<ResponseObject>({
         result: Result.Error,
-        responseTime: Date.now(),
         issues: error.issues,
       })
     }
     return ctx.json<ResponseObject>({
       result: Result.Error,
-      responseTime: Date.now(),
       message: error.toString(),
     })
   }
@@ -67,51 +65,48 @@ indexRouter.get('/', async (ctx) => {
 indexRouter.get('/:type', async (ctx) => {
   try {
     const type = ctx.req.param('type') as StoryTypes || StoryTypes.Top
-
     const query = ctx.req.query()
     const parsedQuery = schema.parse(query)
-
     const page = parseInt(parsedQuery.page)
     const limit = parseInt(parsedQuery.limit)
-
     const stories = await getStories(type)
 
-    const paginateValues = paginate<number>(stories, page, limit)
-
-    let storyArray: Item[] = []
-    const storyAsyncArray: Promise<Item | null>[] = []
-
-    if (stories && paginateValues && Array.isArray(paginateValues.data)) {
-      for (const storyId of paginateValues.data) {
-        storyAsyncArray.push(getItem(storyId.toString()))
-      }
-      storyArray = (await Promise.all(storyAsyncArray)).filter((q) =>
-        q !== null
-      ) as Item[]
-      return ctx.json<Respond<Paginate<Item[]>>>({
-        result: Result.Success,
-        responseTime: Date.now(),
-        ...paginateValues,
-        data: storyArray,
+    if (!stories) {
+      return ctx.json<ResponseObject>({
+        result: Result.Warning,
+        message: 'No data.',
       })
     }
 
-    return ctx.json<ResponseObject>({
-      result: Result.Warning,
-      responseTime: Date.now(),
-      message: 'No data.',
+    const paginateValues = paginate<number>(stories, page, limit)
+    if (!paginateValues || !Array.isArray(paginateValues.data)) {
+      return ctx.json<ResponseObject>({
+        result: Result.Warning,
+        message: 'No data.',
+      })
+    }
+
+    const storyArray = (await Promise.all(paginateValues.data.map((storyId) =>
+      getItem(storyId.toString())
+    )))
+      .filter((item): item is Item =>
+        item !== null
+      )
+
+    return ctx.json<Respond<Paginate<Item[]>>>({
+      result: Result.Success,
+      ...paginateValues,
+      data: storyArray,
     })
   } catch (error) {
     if (error instanceof ZodError) {
       return ctx.json<ResponseObject>({
         result: Result.Error,
-        responseTime: Date.now(),
         issues: error.issues,
       })
     }
     return ctx.json<ResponseObject>({
       result: Result.Error,
-      responseTime: Date.now(),
       message: error.toString(),
     })
   }

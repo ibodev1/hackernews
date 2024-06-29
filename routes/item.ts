@@ -1,4 +1,4 @@
-import { Hono } from 'hono'
+import { Hono } from '@hono/hono'
 import { Item, ResponseObject, Result } from '../types.ts'
 import { getItemWithComments } from '../helpers/item.ts'
 

@@ -15,5 +15,10 @@
       "exclude": ["no-explicit-any"]
     }
   },
-  "importMap": "./import_map.json"
+  "imports": {
+    "@hono/hono": "jsr:@hono/hono@^4.4.9",
+    "@kitsonk/xhr": "jsr:@kitsonk/xhr@^0.4.3",
+    "firebase/": "https://cdn.skypack.dev/firebase@8.7.0/",
+    "zod": "https://deno.land/x/zod@v3.23.8/mod.ts"
+  }
 }

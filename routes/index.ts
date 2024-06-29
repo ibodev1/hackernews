@@ -1,4 +1,4 @@
-import { Hono } from 'hono'
+import { Hono } from '@hono/hono'
 import { schema, ZodError } from './schema.ts'
 import { getItem, getStories } from '../helpers/item.ts'
 import { paginate } from '../helpers/utils.ts'

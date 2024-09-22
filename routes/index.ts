@@ -1,115 +1,111 @@
-import { Hono } from '@hono/hono'
-import { schema, ZodError } from './schema.ts'
-import { getItem, getStories } from '../helpers/item.ts'
-import { paginate } from '../helpers/utils.ts'
-import {
-  Item,
-  Paginate,
-  Respond,
-  ResponseObject,
-  Result,
-  StoryTypes,
-} from '../types.ts'
+import { Hono } from 'hono';
+import { paginateParamsSchema, ZodError } from './schema.ts';
+import { getItem, getStories } from '../helpers/item.ts';
+import { paginate } from '../helpers/utils.ts';
+import { Item, StoryTypes } from '../types/types.ts';
+import { Paginate, Respond, ResponseObject } from '../types/index.ts';
 
-const indexRouter = new Hono()
+const indexRouter = new Hono();
 
 indexRouter.get('/', async (ctx) => {
   try {
-    const query = ctx.req.query()
-    const parsedQuery = schema.parse(query)
-    const page = parseInt(parsedQuery.page)
-    const limit = parseInt(parsedQuery.limit)
-    const stories = await getStories(StoryTypes.Top)
+    const query = ctx.req.query();
+    const parsedQuery = paginateParamsSchema.parse(query);
+    const page = parseInt(parsedQuery.page);
+    const limit = parseInt(parsedQuery.limit);
+    const stories = await getStories(StoryTypes.Top);
 
     if (!stories) {
       return ctx.json<ResponseObject>({
-        result: Result.Warning,
+        result: 'error',
         message: 'No data.',
-      })
+      });
     }
 
-    const paginateValues = paginate<number>(stories, page, limit)
+    const paginateValues = paginate<number>(stories, page, limit);
     if (!paginateValues || !Array.isArray(paginateValues.data)) {
       return ctx.json<ResponseObject>({
-        result: Result.Warning,
+        result: 'error',
         message: 'No data.',
-      })
+      });
     }
 
-    const storyArray = (await Promise.all(paginateValues.data.map((storyId) =>
-      getItem(storyId.toString())
-    )))
-      .filter((item): item is Item =>
-        item !== null
-      )
+    let storyArray: Item[] = [];
 
-    return ctx.json<Respond<Paginate<Item[]>>>({
-      result: Result.Success,
+    if (Array.isArray(paginateValues.data)) {
+      const storyPromises = paginateValues.data.map((storyId) => getItem(storyId.toString()));
+      const stories = await Promise.all(storyPromises);
+      storyArray = stories.filter<Item>((story): story is Item => Boolean(story));
+    }
+
+    return ctx.json<Respond<Paginate<Item>>>({
+      result: 'success',
       ...paginateValues,
       data: storyArray,
-    })
+    });
   } catch (error) {
     if (error instanceof ZodError) {
       return ctx.json<ResponseObject>({
-        result: Result.Error,
+        result: 'error',
         issues: error.issues,
-      })
+      });
     }
     return ctx.json<ResponseObject>({
-      result: Result.Error,
+      result: 'error',
       message: error.toString(),
-    })
+    });
   }
-})
+});
 
 indexRouter.get('/:type', async (ctx) => {
   try {
-    const type = ctx.req.param('type') as StoryTypes || StoryTypes.Top
-    const query = ctx.req.query()
-    const parsedQuery = schema.parse(query)
-    const page = parseInt(parsedQuery.page)
-    const limit = parseInt(parsedQuery.limit)
-    const stories = await getStories(type)
+    const type = ctx.req.param('type') as StoryTypes ?? StoryTypes.Top;
+    const query = ctx.req.query();
+    const parsedQuery = paginateParamsSchema.parse(query);
+    const page = parseInt(parsedQuery.page);
+    const limit = parseInt(parsedQuery.limit);
+    const stories = await getStories(type);
 
     if (!stories) {
       return ctx.json<ResponseObject>({
-        result: Result.Warning,
+        result: 'error',
         message: 'No data.',
-      })
+      });
     }
 
-    const paginateValues = paginate<number>(stories, page, limit)
+    const paginateValues = paginate<number>(stories, page, limit);
     if (!paginateValues || !Array.isArray(paginateValues.data)) {
       return ctx.json<ResponseObject>({
-        result: Result.Warning,
+        result: 'error',
         message: 'No data.',
-      })
+      });
     }
 
-    const storyArray = (await Promise.all(paginateValues.data.map((storyId) =>
-      getItem(storyId.toString())
-    )))
-      .filter((item): item is Item =>
-        item !== null
-      )
+    let storyArray: Item[] = [];
 
-    return ctx.json<Respond<Paginate<Item[]>>>({
-      result: Result.Success,
+    if (Array.isArray(paginateValues.data)) {
+      const storyPromises = paginateValues.data.map((storyId) => getItem(storyId.toString()));
+      const stories = await Promise.all(storyPromises);
+      storyArray = stories.filter<Item>((story): story is Item => Boolean(story));
+    }
+
+    return ctx.json<Respond<Paginate<Item>>>({
+      result: 'success',
       ...paginateValues,
       data: storyArray,
-    })
+    });
   } catch (error) {
     if (error instanceof ZodError) {
       return ctx.json<ResponseObject>({
-        result: Result.Error,
+        result: 'error',
         issues: error.issues,
-      })
+      });
     }
     return ctx.json<ResponseObject>({
-      result: Result.Error,
+      result: 'error',
       message: error.toString(),
-    })
+    });
   }
-})
+});
 
-export default indexRouter
+export default indexRouter;

@@ -1,14 +1,13 @@
-import db from '../db/index.ts'
-import { User } from '../types.ts'
+import db from '../db/index.ts';
+import { User } from '../types/types.ts';
 
 const getUser = async (userId: string): Promise<User | null> => {
   try {
-    const userSnapshot = await db.child('user').child(userId).get()
-    if (!userSnapshot.exists()) return null
-    return userSnapshot.val() as User
+    const userSnapshot = await db.child('user').child(userId).get();
+    return userSnapshot.exists() ? (userSnapshot.val() as User) : null;
   } catch {
-    return null
+    return null;
   }
-}
+};
 
-export { getUser }
+export { getUser };

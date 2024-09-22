@@ -1,99 +1,85 @@
-import { Hono } from '@hono/hono'
-import {
-  Item,
-  Paginate,
-  Respond,
-  ResponseObject,
-  Result,
-  User,
-} from '../types.ts'
-import { getUser } from '../helpers/user.ts'
-import { schema, ZodError } from './schema.ts'
-import { paginate } from '../helpers/utils.ts'
-import { getItem } from '../helpers/item.ts'
+import { Hono } from 'hono';
+import { Paginate, Respond, ResponseObject } from '../types/index.ts';
 
-const userRouter = new Hono()
+import { getUser } from '../helpers/user.ts';
+import { paginateParamsSchema, ZodError } from './schema.ts';
+import { paginate } from '../helpers/utils.ts';
+import { getItem } from '../helpers/item.ts';
+import { Item, User } from '../types/types.ts';
+
+const userRouter = new Hono();
 
 userRouter.get('/:id', async (ctx) => {
   try {
-    const id = ctx.req.param('id')
-    if (typeof id === 'string' && id !== '') {
-      const user = await getUser(id)
+    const id = ctx.req.param('id');
+    if (typeof id === 'string' && id.trim() !== '') {
+      const user = await getUser(id);
       if (user) {
-        return ctx.json<User>(user)
+        return ctx.json<User>(user);
       } else {
         return ctx.json<ResponseObject>({
-          result: Result.Warning,
+          result: 'error',
           message: 'Not found',
-        })
+        });
       }
     }
 
     return ctx.json<ResponseObject>({
-      result: Result.Warning,
+      result: 'error',
       message: 'Not found',
-    })
+    });
   } catch (error) {
     return ctx.json<ResponseObject>({
-      result: Result.Error,
+      result: 'error',
       message: error.toString(),
-    })
+    });
   }
-})
+});
 
 userRouter.get('/:id/submitted', async (ctx) => {
   try {
-    const id = ctx.req.param('id')
+    const id = ctx.req.param('id');
+    const { page, limit } = paginateParamsSchema.parse(ctx.req.query());
 
-    const query = ctx.req.query()
-    const parsedQuery = schema.parse(query)
+    if (typeof id === 'string' && id.trim() !== '') {
+      const user = await getUser(id);
+      if (user?.submitted && Array.isArray(user.submitted)) {
+        const paginateValues = paginate<number>(
+          user.submitted,
+          parseInt(page),
+          parseInt(limit),
+        );
 
-    const page = parseInt(parsedQuery.page)
-    const limit = parseInt(parsedQuery.limit)
+        const submittedArray: Item[] = (
+          await Promise.all(
+            paginateValues.data.map((storyId) => getItem(storyId.toString())),
+          )
+        ).filter((item): item is Item => Boolean(item));
 
-    if (typeof id === 'string' && id !== '') {
-      const user = await getUser(id)
-      if (user && Array.isArray(user.submitted)) {
-        let submittedArray: Item[] = []
-        const paginateValues = paginate<number>(user.submitted, page, limit),
-          submittedAsyncArray: Promise<Item | null>[] = []
-        if (paginateValues && Array.isArray(paginateValues.data)) {
-          for (const storyId of paginateValues.data) {
-            submittedAsyncArray.push(getItem(storyId.toString()))
-          }
-          submittedArray = (await Promise.all(submittedAsyncArray)).filter(
-            (q) => q !== null,
-          ) as Item[]
-          return ctx.json<Respond<Paginate<Item[]>>>({
-            result: Result.Success,
-            ...paginateValues,
-            data: submittedArray,
-          })
-        }
-      } else {
-        return ctx.json<ResponseObject>({
-          result: Result.Warning,
-          message: 'Not found',
-        })
+        return ctx.json<Respond<Paginate<Item>>>({
+          result: 'success',
+          ...paginateValues,
+          data: submittedArray,
+        });
       }
     }
 
     return ctx.json<ResponseObject>({
-      result: Result.Warning,
+      result: 'error',
       message: 'Not found',
-    })
+    });
   } catch (error) {
     if (error instanceof ZodError) {
       return ctx.json<ResponseObject>({
-        result: Result.Error,
+        result: 'error',
         issues: error.issues,
-      })
+      });
     }
     return ctx.json<ResponseObject>({
-      result: Result.Error,
+      result: 'error',
       message: error.toString(),
-    })
+    });
   }
-})
+});
 
-export default userRouter
+export default userRouter;

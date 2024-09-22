@@ -1,8 +1,8 @@
-import { z, ZodError } from 'zod'
+import { z, ZodError } from 'zod';
 
-const schema = z.object({
-  page: z.string().default('1'),
-  limit: z.string().default('30'),
-})
+const paginateParamsSchema = z.object({
+  page: z.string().optional().default('1'),
+  limit: z.string().optional().default('30'),
+});
 
-export { schema, ZodError }
+export { paginateParamsSchema, ZodError };

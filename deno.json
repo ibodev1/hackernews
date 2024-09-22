@@ -1,11 +1,13 @@
 {
   "lock": false,
   "tasks": {
-    "dev": "deno run --allow-all --watch main.ts"
+    "dev": "deno run --allow-all --watch main.ts",
+    "check": "deno check **/*.ts"
   },
   "fmt": {
-    "semiColons": false,
-    "singleQuote": true
+    "semiColons": true,
+    "singleQuote": true,
+    "lineWidth": 160
   },
   "compilerOptions": {
     "strict": true
@@ -16,9 +18,10 @@
     }
   },
   "imports": {
-    "@hono/hono": "jsr:@hono/hono@^4.4.9",
+    "hono": "npm:hono",
+    "zod": "npm:zod",
     "@kitsonk/xhr": "jsr:@kitsonk/xhr@^0.4.3",
-    "firebase/": "https://cdn.skypack.dev/firebase@8.7.0/",
-    "zod": "https://deno.land/x/zod@v3.23.8/mod.ts"
+    "firebase/": "https://cdn.skypack.dev/firebase@8/",
+    "virtualstorage": "https://deno.land/x/virtualstorage@0.1.0/mod.ts"
   }
 }

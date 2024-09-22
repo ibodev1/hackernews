@@ -1,39 +1,39 @@
-import db from '../db/index.ts'
-import { Item, ItemWithComments, StoryTypes } from '../types.ts'
+import db from '../db/index.ts';
+import { Item, ItemWithComments, StoryTypes } from '../types/types.ts';
 
 const getItem = async (itemId: string): Promise<Item | null> => {
   try {
-    const itemSnapshot = await db.child('item').child(itemId).get()
-    if (!itemSnapshot.exists()) return null
-    return itemSnapshot.val() as Item
+    const itemSnapshot = await db.child('item').child(itemId).get();
+    return itemSnapshot.exists() ? itemSnapshot.val() as Item : null;
   } catch {
-    return null
+    return null;
   }
-}
+};
 
-const getStories = async (storyType: StoryTypes) => {
+const getStories = async (storyType: StoryTypes): Promise<number[] | null> => {
   try {
-    const storySnapshot = await db.child(storyType).get()
-    if (!storySnapshot.exists()) return null
-    return storySnapshot.val() as number[]
+    const storySnapshot = await db.child(storyType).get();
+    return storySnapshot.exists() ? storySnapshot.val() as number[] : null;
   } catch {
-    return null
+    return null;
   }
-}
+};
 
 const getItemWithComments = async (
   itemId: string,
 ): Promise<ItemWithComments | null> => {
-  const item = await getItem(itemId)
-  if (!item) return null
+  const item = await getItem(itemId);
+  if (!item) return null;
 
-  const comments = Array.isArray(item.kids)
-    ? (await Promise.all(
-      item.kids?.map((childId) => getItem(childId.toString())),
-    )).filter(Boolean) as Item[]
-    : []
+  let comments: Item[] = [];
 
-  return { ...item, comments }
-}
+  if (Array.isArray(item.kids)) {
+    const commentsPromises = item.kids.map((childId) => getItem(String(childId)));
+    const itemComments = await Promise.all(commentsPromises);
+    comments = itemComments.filter<Item>((comment): comment is Item => Boolean(comment));
+  }
 
-export { getItem, getItemWithComments, getStories }
+  return { ...item, comments };
+};
+
+export { getItem, getItemWithComments, getStories };

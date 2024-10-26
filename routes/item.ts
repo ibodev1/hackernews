@@ -1,33 +1,31 @@
 import { Hono } from 'hono';
 import { getItemWithComments } from '../helpers/item.ts';
 import { ItemWithComments } from '../types/types.ts';
-import { ResponseObject } from '../types/index.ts';
+import type { Respond } from '../types/index.ts';
 
 const itemRouter = new Hono();
 
-itemRouter.get('/:id', async (ctx) => {
+itemRouter.get('/:id', async (c) => {
   try {
-    const id = ctx.req.param('id');
-    if (typeof id === 'string' && id !== '') {
+    const id = c.req.param('id');
+
+    if (typeof id === 'string' && id.trim() !== '') {
       const item = await getItemWithComments(id);
+
       if (item) {
-        return ctx.json<ItemWithComments>(item);
-      } else {
-        return ctx.json<ResponseObject>({
-          result: 'error',
-          message: 'Not found',
-        });
+        return c.json<ItemWithComments>(item);
       }
     }
 
-    return ctx.json<ResponseObject>({
+    return c.json<Respond>({
       result: 'error',
       message: 'Not found',
     });
-  } catch (error) {
-    return ctx.json<ResponseObject>({
+  } catch (error: any) {
+    return c.json<Respond>({
       result: 'error',
-      message: error.toString(),
+      error,
+      message: error?.message,
     });
   }
 });

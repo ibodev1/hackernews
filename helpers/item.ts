@@ -25,13 +25,9 @@ const getItemWithComments = async (
   const item = await getItem(itemId);
   if (!item) return null;
 
-  let comments: Item[] = [];
-
-  if (Array.isArray(item.kids)) {
-    const commentsPromises = item.kids.map((childId) => getItem(String(childId)));
-    const itemComments = await Promise.all(commentsPromises);
-    comments = itemComments.filter<Item>((comment): comment is Item => Boolean(comment));
-  }
+  const commentsPromises = item.kids?.map((childId) => getItem(String(childId))) ?? [];
+  const itemComments = await Promise.all(commentsPromises);
+  const comments = itemComments.filter<Item>((comment): comment is Item => Boolean(comment));
 
   return { ...item, comments };
 };

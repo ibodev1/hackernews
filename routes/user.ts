@@ -1,54 +1,50 @@
 import { Hono } from 'hono';
-import { Paginate, Respond, ResponseObject } from '../types/index.ts';
-
+import { Respond } from '../types/index.ts';
 import { getUser } from '../helpers/user.ts';
-import { paginateParamsSchema, ZodError } from './schema.ts';
+import { paginateParamsSchema } from './schema.ts';
 import { paginate } from '../helpers/utils.ts';
 import { getItem } from '../helpers/item.ts';
 import { Item, User } from '../types/types.ts';
+import { zValidator } from '@hono/zod-validator';
+import { ZodError } from 'zod';
 
 const userRouter = new Hono();
 
-userRouter.get('/:id', async (ctx) => {
+userRouter.get('/:id', async (c) => {
   try {
-    const id = ctx.req.param('id');
+    const id = c.req.param('id');
+
     if (typeof id === 'string' && id.trim() !== '') {
       const user = await getUser(id);
+
       if (user) {
-        return ctx.json<User>(user);
-      } else {
-        return ctx.json<ResponseObject>({
-          result: 'error',
-          message: 'Not found',
-        });
+        return c.json<User>(user);
       }
     }
 
-    return ctx.json<ResponseObject>({
+    return c.json<Respond>({
       result: 'error',
       message: 'Not found',
     });
-  } catch (error) {
-    return ctx.json<ResponseObject>({
+  } catch (error: any) {
+    return c.json<Respond>({
       result: 'error',
-      message: error.toString(),
+      message: error?.message,
     });
   }
 });
 
-userRouter.get('/:id/submitted', async (ctx) => {
+userRouter.get('/:id/submitted', zValidator('query', paginateParamsSchema), async (c) => {
   try {
-    const id = ctx.req.param('id');
-    const { page, limit } = paginateParamsSchema.parse(ctx.req.query());
+    const id = c.req.param('id');
+
+    const queryPaginateValues = c.req.valid('query');
 
     if (typeof id === 'string' && id.trim() !== '') {
       const user = await getUser(id);
+
       if (user?.submitted && Array.isArray(user.submitted)) {
-        const paginateValues = paginate<number>(
-          user.submitted,
-          parseInt(page),
-          parseInt(limit),
-        );
+        const paginateValues = paginate<number>(user.submitted, queryPaginateValues);
 
         const submittedArray: Item[] = (
           await Promise.all(
@@ -56,28 +52,30 @@ userRouter.get('/:id/submitted', async (ctx) => {
           )
         ).filter((item): item is Item => Boolean(item));
 
-        return ctx.json<Respond<Paginate<Item>>>({
+        return c.json<Respond>({
           result: 'success',
-          ...paginateValues,
+          paginate: paginateValues,
           data: submittedArray,
         });
       }
     }
 
-    return ctx.json<ResponseObject>({
+    return c.json<Respond>({
       result: 'error',
       message: 'Not found',
     });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof ZodError) {
-      return ctx.json<ResponseObject>({
+      return c.json<Respond>({
         result: 'error',
+        error,
         issues: error.issues,
       });
     }
-    return ctx.json<ResponseObject>({
+    return c.json<Respond>({
       result: 'error',
-      message: error.toString(),
+      error,
+      message: error?.message,
     });
   }
 });

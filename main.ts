@@ -18,15 +18,15 @@ app.route('/', indexRouter);
 app.route('/item', itemRouter);
 app.route('/user', userRouter);
 
-app.notFound((ctx) => {
-  return ctx.json<Respond>({
+app.notFound((c) => {
+  return c.json<Respond>({
     result: 'error',
     message: '404 Not Found',
   });
 });
 
-app.onError((error, ctx) => {
-  return ctx.json<Respond>({
+app.onError((error, c) => {
+  return c.json<Respond>({
     result: 'error',
     message: error.message,
   });

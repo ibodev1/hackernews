@@ -18,9 +18,10 @@
     }
   },
   "imports": {
+    "@hono/zod-validator": "npm:@hono/zod-validator@^0.4.1",
     "hono": "npm:hono",
     "zod": "npm:zod",
-    "@kitsonk/xhr": "jsr:@kitsonk/xhr@^0.4.3",
+    "@kitsonk/xhr": "jsr:@kitsonk/xhr@^0.5.0",
     "firebase/": "https://cdn.skypack.dev/firebase@8/",
     "virtualstorage": "https://deno.land/x/virtualstorage@0.1.0/mod.ts"
   }
